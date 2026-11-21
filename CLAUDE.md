@@ -9,7 +9,8 @@
 ## Machine
 - Windows, PowerShell. Project folder: C:\Users\tctay\Projects\Creatency (kept out of OneDrive on purpose).
 - Git 2.56.1 and Node.js 26.13.1 installed 2026-11-21. VS Code installed.
-- GitHub repo name: create-envy (private).
+- GitHub repo: https://github.com/MzArtPlusSpark/create-envy (private). Remote `origin`, branch `main` tracks `origin/main`.
+- The GitHub CLI (`gh`) is not installed. For pushes, Spark may need to run `! git push` in the prompt.
 - On 2026-11-21 a `git init` accidentally ran in C:\Users\tctay; it was removed. Always confirm the working directory before git commands.
 
 ## Plan
