@@ -149,6 +149,60 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 - current_user (→ User), device_type, push_notification_token (text)
 - Privacy: Everyone can find a device and see its type and user. The token stays hidden.
 
+### Chores, tasks and jobs
+
+**Chore** (household chores, earned in tokens)
+- title, description, room (→ Room), level (→ Chore Level), minutes, token_value (number)
+- People: assigned_to, assigned_by, approved_by (→ User)
+- Timing: frequency (→ Recurrence Frequency), due_date, submitted_date, last_completed_date, rotation_id (text)
+- Proof: proof_photo (image), proof_note, sent_back_note (text)
+- status (→ chorestatus), household (→ Household)
+- Privacy: Household members only.
+
+**ChoreTransferRequest** (one member offering tokens to pass a chore to another)
+- chore (→ Chore), from_user, to_user (→ User), offer_tokens (number)
+- from_agreed, to_agreed, settled (yes/no), status (→ transferstatus), household (→ Household)
+- Privacy: Household members only.
+
+**House Duty** (a recurring daily duty, such as cooking dinner on set days)
+- name, kind (→ Duty Kind), member (→ User), days (→ Cal Day [list]), start_time (date), prep_minutes
+- proof_required, is_active (yes/no), household (→ Household)
+- Privacy: Household members only.
+
+**Duty Checkin** (proof a duty was done on a given day)
+- duty (→ House Duty), member (→ User), day (date), photo (image), household (→ Household)
+- Privacy: Household members only.
+
+**Task** (one-off work posted by a member, which can be shared with connected households)
+- title, description, base_reward (number), visibility (text: own household or "Connected households")
+- People: posted_by, claimed_by, completed_by (→ User)
+- self_completion, payout_requested (yes/no), status (→ taskstatus_new), household (→ Household)
+- Privacy: The household sees it. Connected households also see it when visibility is "Connected households."
+
+**TaskIncentive** (extra tokens someone adds on top of a Task's reward)
+- task (→ Task), contributor (→ User), amount (number), visibility (text), household (→ Household)
+- Privacy: The same as Task.
+
+**Job** (bigger paid work on the community job board)
+- title, description, job_image (image), task_category (→ Task Category), difficulty (→ jobdifficulty), time_window (→ jobtimewindow)
+- Pay: pay_amount, funding_source (→ Funding Source), progress_percent, released_percent (numbers: pay is released as progress is made)
+- People: parent_user, assigned_to (→ User), accepted_bid (→ Bid), household (→ Household), is_household_assigned (yes/no)
+- Repeats: is_recurring (yes/no), recurrence_frequency (→ Recurrence Frequency)
+- requires_camera_proof (yes/no), status (→ jobstatus)
+- Privacy: Owner and Staff see everything. **Any signed-in user who has a household sees every job on the platform**, including pay and who it's assigned to. That looks intended (it's the community board).
+
+**Bid** (a kid's pitch for a Job)
+- job (→ Job), kid_user (→ User), pitch_text, pitch_video (file), proposed_price (number), status (→ bidstatus)
+- Privacy: The bidder sees it. **So does every Parent, Leader, Owner and Staff member on the platform, in any household**, including the kid's pitch video.
+
+**Outsource Request** (one household asking another to take a Job for tokens)
+- job (→ Job), requesting_household, target_household (→ Household), token_amount (number), status (→ Outsourcestatus)
+- Privacy: Only the person who created it can see it. **The household it's sent to can't see it**, which may be a bug.
+
+**ProgressPhoto** (a kid's photo showing progress on a Job)
+- job (→ Job), kid_user (→ User), photo_image (image), caption (text), progress_percent (number), captured_via_camera (yes/no)
+- Privacy: ⚠️ **Everyone sees everything, including the photos, even when logged out.**
+
 ### Privacy findings so far
 
 1. **HouseholdIntro was fully public.** Its photos and files could be seen and searched without signing in.
@@ -156,7 +210,10 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 2. **TeamMember was fully public.** Anyone could see which kids accepted which job invitations.
    - **Fixed 2026-11-21 in Bubble `test`, not yet deployed to Live.** Now visible to the kid themselves, the kid leading the bid, the kid's own household and the household that posted the job. Everyone else sees nothing.
    - Known gap: teammates from *different* households can't see each other's TeamMember records. The bid leader still sees everyone on the team.
-3. **Device can be searched by anyone**, which reveals which users have the phone app. Not changed yet.
+3. **Device can be searched by anyone**, which reveals which users have the phone app. Not changed yet: the Bubble connection can't edit this built-in type.
+4. **ProgressPhoto is fully public.** Anyone, even logged out, can see and search kids' job photos, linked to the kid's account. Not changed yet.
+5. **Bid pitch videos are visible to every adult on the platform**, not just the household that posted the job. Not changed yet. It may be intended, but it's worth deciding on purpose.
+6. **Outsource Request is hidden from the household it's sent to.** Only its creator can see it. This might stop the target household from ever seeing the request. Check how the page uses it.
 
 Both types also have an **Owner and staff** rule. Spark added it in the editor, because the Bubble connection can't write role checks.
 
