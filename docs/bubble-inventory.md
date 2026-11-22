@@ -90,6 +90,80 @@ Room, Ward, Coach, Cal Day, Cal Week, chattype, userrole, workkind, bidstatus, C
 
 Global expressions: CreditPerDollar, TokensPerDollar (the exchange rates between money, credit and tokens).
 
+## Pass 2: data (fields and privacy)
+
+Every type also has Bubble's built-in fields: Created By, Created Date, Modified Date and Slug. They are left out below. `→ Type` means a link to another record, and `[list]` means it holds many.
+
+### People and households
+
+**User**
+- Identity: email, name, preferred_name, birthday (date), phone, contact_email, avatar_image (image), member_code
+- Role: role (→ userrole), account_type (→ Account Type), household_role (text), is_approver (yes/no), coach (→ Coach)
+- Household: household (→ Household), approved_chats (→ Chat [list])
+- Tokens and credit: wallet_balance (number, shown as "Token Balance"), ledger_carry, parent_contribution_credit
+- Ward: ward (→ Ward), ward_chosen (yes/no), ward_changes_used (number)
+- Care meters (dates): fed_until, dressed_until, fresh_until, cozy_until, geared_until
+- Care pieces (numbers): food_pieces, clothing_pieces, hygiene_pieces, room_pieces, gear_pieces
+- Work profile: skills, tools_owned, availability (text), rating (number), promo_video (file), chores_approved (number)
+- Scoring: score_open_for (→ Household Score)
+- Privacy: 6 rules
+  - Owner and Staff see everything.
+  - Users see all of their own data.
+  - Adults see most fields of people in their household.
+  - Kids see household members' progress but not their credit.
+  - Connected households see only names.
+  - Everyone else sees a public work profile: name, avatar, skills, rating and promo video.
+
+**Household**
+- name, connected_households (→ Household [list])
+- Membership: tier, pending_tier (→ Membership Tier), subscription_status (text)
+- Stripe: stripe_customer_id, stripe_subscription_id (text)
+- Verification: verification_method (→ verificationmethod), verification_status (→ verificationstatus), verification_document (file)
+- Safety: trusted_adult_name, trusted_adult_contact (text)
+- Scoring: score_open_requested (date)
+- Privacy: Owner and Staff see everything. Household members see everything. Logged-in users see the name, connections and verification status. Everyone else sees nothing.
+
+**HouseholdIntro** (one household introducing itself to another)
+- sender_household, recipient_household (→ Household)
+- sender_status, recipient_status (→ introstatus)
+- media_type (→ intromediatype), media_file (file), media_image (image)
+- Privacy: ⚠️ **Everyone sees everything, including the media, even when logged out.**
+
+**Household Invite**
+- code, household (→ Household), created_by (→ User), expiry_date, used (yes/no), used_by (→ User)
+- Privacy: The creator and the household's Parents or Leaders see it. Everyone else sees nothing.
+
+**Relationship** (how two members are related, such as "Mom")
+- from_member, to_member (→ User), household (→ Household), label (text)
+- Privacy: Household members only.
+
+**TeamMember** (a kid on a team bidding for a Job)
+- kid_user (→ User), bid (→ Bid), invited_at (date), accepted_invite, joined_mid_job (yes/no)
+- Privacy: ⚠️ **Everyone sees everything, which reveals which kids are on which jobs.**
+
+**Member Login** (code-based sign-in for members)
+- member (→ User), household (→ Household), login_email, code, secret (text)
+- Privacy: Nobody sees it on screen, so only backend workflows can use it. Good, because it holds a secret.
+
+**Device** (phone app push notifications)
+- current_user (→ User), device_type, push_notification_token (text)
+- Privacy: Everyone can find a device and see its type and user. The token stays hidden.
+
+### Privacy findings so far
+
+1. **HouseholdIntro was fully public.** Its photos and files could be seen and searched without signing in.
+   - **Fixed 2026-11-21 in Bubble `test` (Main), not yet deployed to Live.** Now only the sender and recipient households can see an intro. Everyone else sees nothing.
+2. **TeamMember was fully public.** Anyone could see which kids accepted which job invitations.
+   - **Fixed 2026-11-21 in Bubble `test`, not yet deployed to Live.** Now visible to the kid themselves, the kid leading the bid, the kid's own household and the household that posted the job. Everyone else sees nothing.
+   - Known gap: teammates from *different* households can't see each other's TeamMember records. The bid leader still sees everyone on the team.
+3. **Device can be searched by anyone**, which reveals which users have the phone app. Not changed yet.
+
+Both types also have an **Owner and staff** rule. Spark added it in the editor, because the Bubble connection can't write role checks.
+
+Bubble savepoint taken before the fixes: `1795282240017` (to roll back if needed).
+
+**For the rebuild:** privacy should be decided per record type from the start, with "nobody" as the default, never "everyone."
+
 ## Next passes
 
 1. **Pass 2, data:** read every data type's fields and privacy rules, and every option set's values. This becomes the starting point for the Prisma data model in milestone 4.
