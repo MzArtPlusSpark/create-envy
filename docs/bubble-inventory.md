@@ -258,6 +258,78 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 - given_by, member (→ User), item (→ Ward Item), household (→ Household)
 - Privacy: Household members only.
 
+### Effort and scoring
+
+**Effort Event** (one logged piece of effort, the raw input to monthly scores)
+- member (→ User), household (→ Household), day (date), kind (→ Effort Kind), label (text), minutes, step (numbers)
+- is_private (yes/no): private effort is hidden from approvers
+- Privacy: The member, plus approvers in the household for non-private events.
+
+**Household Score** (one household's score for one period, usually a month)
+- household (→ Household), period_start, period_end (dates), member_count
+- Targets: chore_target, agreement_target, share_target
+- Progress: required_done, agreement_done, improvement_done, makeup_counted, house_total
+- Lifecycle (yes/no): close_requested, finish_requested, finished, gap_closed
+- Privacy: Same household only.
+
+**Member Score** (one member's share of a Household Score)
+- member (→ User), household (→ Household), household_score (→ Household Score), period_start
+- Targets and progress: share_target, agreement_target, required_done, agreement_done, improvement_done, makeup_done, total, percent
+- Outcome (yes/no): completed_share, closed, rewarded, reward_delivered
+- Privacy: Same household only.
+
+### Agreements, Keep and accountability
+
+**House Agreement** (a household rule everyone acknowledges)
+- title, agreement_text, is_active (yes/no), household (→ Household)
+- acknowledged_by (→ User [list]), created_from_offense (→ Offense)
+- Privacy: Household members only.
+
+**Keep Item** (something a member owns or uses and must keep up, with a monthly cost)
+- name, category (→ Keep Category), member (→ User), household (→ Household)
+- duties (text [list]), monthly_cost, grace_hours (numbers), consequence (text), is_active (yes/no)
+- Privacy: The member, plus approvers in the household.
+
+**Keep Agreement** (one period's duties for a Keep Item)
+- keep_item (→ Keep Item), member (→ User), household (→ Household)
+- duties, duties_done (text [list]), expected_minutes, due_date, earned_date
+- status (→ Keep Status), review_note (text)
+- Privacy: The member, plus approvers in the household.
+
+**Offense** (the "Make It Right" process: something went wrong at home)
+- number, title, notice_text, impact_on_house (text), room (→ Room), scope (→ Offense Scope), status (→ Offense Status)
+- People: reporter, owner (→ User), involved_members (→ User [list]), reporter_confirmed (yes/no), reporter_version (text)
+- Evidence: evidence_photo (image)
+- Process: own_it_deadline, owned_date, closed_date; reflection_questions, repair_checklist, prevention_tips (text [lists])
+- Links: house_agreement (→ House Agreement), household (→ Household), is_private (yes/no)
+- Privacy, thoughtfully designed:
+  - The reporter and the owner see everything.
+  - Involved members and the household (non-private only) see everything **except who the owner is**.
+
+**Offense Response** (one member's response to an Offense)
+- offense (→ Offense), member (→ User), offense_reporter (→ User), household (→ Household)
+- their_side, personal_plan (text), reflection_answers, repair_steps_done (text [lists]), repair_proof (image [list])
+- owned_it (yes/no), status (→ Response Status), acknowledged_date, completed_date
+- Privacy: Only the responding member and the reporter. Parents who aren't the reporter can't see it.
+
+**Formal Request** (a member asking permission for something bigger, such as an event or a purchase)
+- title, details, kind (→ Request Kind), status (→ Request Status), requester, decided_by (→ User)
+- Event: event_date, location, who_will_be_there, transportation, contact_name, contact_phone, link (text), photo (image)
+- Money: estimated_cost, my_contribution (numbers), offer (text), earn_by (date)
+- Conditions: conditions, conditions_done (text [lists]), approver_note, submitted_date
+- Privacy: The requester, plus approvers in the household.
+
+**Permission Type** (a household's kinds of pass, such as "go to a friend's house")
+- name, description, is_active, always_manual (yes/no), household (→ Household)
+- Requirements (yes/no): needs_duties_done, needs_room_photo, needs_school_standing
+- Privacy: Household members only.
+
+**Permission Request** (a member asking for a pass)
+- member (→ User), permission_type (→ Permission Type), household (→ Household)
+- details (text), reasons (text [list]), room_photo (image), requested_date, back_by
+- status (→ Pass Status), decided_by (→ User), steward_note (text)
+- Privacy: The member, plus approvers in the household.
+
 ### Privacy findings so far
 
 1. **HouseholdIntro was fully public.** Its photos and files could be seen and searched without signing in.
