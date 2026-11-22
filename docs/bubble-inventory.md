@@ -330,6 +330,55 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 - status (→ Pass Status), decided_by (→ User), steward_note (text)
 - Privacy: The member, plus approvers in the household.
 
+### School
+
+**School Plan** (a member's plan to catch up or stay on track at school)
+- member, set_up_by (→ User), household (→ Household), is_active (yes/no)
+- comeback_goal (text), expected_minutes (number), started, first_due, goal_check_date (dates)
+- Privacy: The member, plus approvers ("Stewards") in the household.
+
+**School Assignment** (one piece of schoolwork to turn in)
+- title, class_name (text), due_date, member, added_by, verified_by (→ User)
+- plan (→ School Plan), household (→ Household), status (→ Assignment Status)
+- Proof: proof_photo (image), turned_in_date, steward_note (text)
+- Privacy: The member, plus approvers in the household.
+
+**Grade Check** (a regular check of grades and missing work)
+- member, verified_by (→ User), plan (→ School Plan), household (→ Household), status (→ Grade Check Status)
+- Evidence: grades_screenshot, missing_work_screenshot (images), missing_count (number)
+- due, turned_in_date, verified_date (dates), turned_in_late (yes/no), member_note, steward_note (text)
+- Privacy: The member, plus approvers in the household.
+
+### Messages and activity
+
+**Chat** (a conversation: household, job or other, by chat_type)
+- title, chat_type (→ chattype), household (→ Household), job (→ Job)
+- Access is controlled by each User's approved_chats list.
+- Privacy: Approved participants and the Owner see everything. **Any signed-in user can see every chat's title, type and household.** That's minor, but it's a directory of everyone's chats.
+
+**ChatParticipant** (someone in a chat, with adult approval for minors)
+- chat (→ Chat), participant_user (→ User), household (→ Household), pending_approval, has_left (yes/no)
+- Privacy: The participant, co-participants, the Owner, and Parents or Leaders in the participant's household. That last group is how parents approve kids joining chats.
+
+**Message**
+- chat (→ Chat), sender_user (→ User), sender_household (→ Household), message_text, attachment_file (file), attachment_image (image)
+- Privacy: Approved participants, the sender and the Owner only.
+
+**Coach Message** (a member's conversation with a coach; Coach is an option set, possibly an AI coach)
+- member (→ User), household (→ Household), coach (→ Coach), from_coach (yes/no), message (text)
+- Privacy: Only the member. Parents can't see their kids' coach chats. That's probably intended, but decide it on purpose.
+
+**Activity** (outings or experiences kids can spend tokens on)
+- name, description, image, provider (text), token_cost (number), audience (→ activityaudience)
+- Approval: approval_status (→ approvalstatus), approved_by, created_by (→ User)
+- Privacy: Signed-in users see approved activities. Approvers on the platform see all of them. The creator sees their own.
+
+### Training
+
+**Training Module** (staff and partner training)
+- title, description, audience_role (→ userrole), created_by (→ User)
+- Privacy: Users whose role matches the audience, plus the creator, the Training team and the Owner.
+
 ### Privacy findings so far
 
 1. **HouseholdIntro was fully public.** Its photos and files could be seen and searched without signing in.
@@ -344,6 +393,10 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 7. **Transaction is fully public.** Anyone, even logged out, can see and search every kid's token earnings and spending, with notes. Not changed yet. It has no household field, so a fix would go through kid_user's household.
 8. **Auto-binding on money-like fields.** Redemption (tokens_spent and status), Perk Redemption, Reward Streak and Outsource Request (token_amount and status) let their creator auto-save these fields. A member could change their own spend, streak or status, if a page has a linked input. Pass 4 should check which pages actually have such inputs. In the rebuild, only server code should ever change balances and statuses.
 9. **Perk Redemption is hidden from parents.** Only the person who redeemed it sees it, so parents may not see what their kids spent tokens on.
+10. **The chat directory is open to every signed-in user**: titles, types and households of all chats, though not the messages. Minor.
+11. **Coach Messages are hidden from parents.** Probably intended. Decide it on purpose for the rebuild.
+
+**Summary after all 47 data types:** 3 types were fully public (HouseholdIntro and TeamMember are fixed on `test`; ProgressPhoto and Transaction are not yet). Device can be searched by anyone. Everything else is limited to households, members or roles, and most of it is designed with care.
 
 Both types also have an **Owner and staff** rule. Spark added it in the editor, because the Bubble connection can't write role checks.
 
