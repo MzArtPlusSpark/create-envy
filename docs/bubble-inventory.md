@@ -203,6 +203,61 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 - job (→ Job), kid_user (→ User), photo_image (image), caption (text), progress_percent (number), captured_via_camera (yes/no)
 - Privacy: ⚠️ **Everyone sees everything, including the photos, even when logged out.**
 
+### Tokens, store and rewards
+
+**Transaction** (the token ledger: every earn and spend)
+- kid_user (→ User), amount (number), note (text)
+- transaction_type (→ transactiontype), transaction_category (→ Transaction Category)
+- What it came from: chore (→ Chore), task (→ Task), job (→ Job)
+- No household field: the household is only known through kid_user.
+- Privacy: ⚠️ **Everyone sees everything, even when logged out.** That's every kid's earnings history.
+
+**Store Item** (rewards kids can buy with tokens, often supplied by a sponsor or partner)
+- item_name, description, item_image (image), token_cost, stock_quantity (numbers)
+- Sponsor: sponsor_name (text), partner_payout_per_item (number)
+- Approval: approval_status (→ approvalstatus), approved_by, created_by (→ User)
+- Privacy:
+  - Signed-in users see approved items.
+  - Approvers (is_approver = yes) see every item, in any household.
+  - The creator sees their own items.
+  - Inventory, Owner and Staff see everything.
+
+**Redemption** (a kid buying a Store Item)
+- user (→ User), store_item (→ Store Item), tokens_spent (number), status (→ Redemption Status), activity (→ Activity)
+- Delivery: delivered_by (→ User), delivered_date
+- Partner payout: supplier (→ User), payout_owed (number), payout_paid (yes/no), payout_paid_date
+- Privacy: The redeemer, the creator, and Inventory, Owner and Staff.
+- ⚠️ The creator rule has **auto-binding** turned on for user, store_item, tokens_spent and status. If a page has an input linked to those fields, a kid could change what they spent, or mark their own redemption as delivered.
+
+**BundlePurchase** (a parent buying a token bundle with real money)
+- buyer (→ User), household (→ Household), bundle_name, dollars_paid, tokens_granted, credit_granted, stripe_charge_ref
+- Privacy: The buyer, plus adults (not kids) in the same household.
+
+**Perk** (household-made rewards, such as "pick the movie")
+- name, description, token_cost, household (→ Household), created_by, approved_by (→ User), approval_status (→ approvalstatus)
+- Two "active" fields: active? and is_active (yes/no). **Duplicate field**: the rebuild should keep only one.
+- Privacy: Approved perks are visible to their household. Every approver on the platform sees all perks. The creator sees their own.
+
+**Perk Redemption** (a member spending tokens on a Perk)
+- perk (→ Perk), redeemed_by (→ User), redeemed_date, tokens_spent, status (→ Redemption Status)
+- Privacy: Only the creator. **Parents in the household can't see it.**
+- ⚠️ Auto-binding is on for every field, so the same tampering risk as Redemption applies.
+
+**Reward Streak** (days in a row a member finished a task category)
+- user (→ User), task_category (→ Task Category), current_streak, longest_streak (numbers), last_completed_date
+- Privacy: Only the member.
+- ⚠️ Auto-binding is on for every field, so a member could edit their own streak.
+
+**WishListItem** (a kid saving up for something, which parents can help fund)
+- kid_user (→ User), household (→ Household), item_name, item_image, price, store_item (→ Store Item)
+- Saving: saved_amount, parent_target_credit, parent_contributed_credit (numbers)
+- Outcome: unlocked (yes/no), unlocked_date, delivered (yes/no), redemption (→ Redemption), activity (→ Activity)
+- Privacy: The kid, plus Parents and Leaders in the same household.
+
+**Ward Gift** (one member giving another a care item for their Ward)
+- given_by, member (→ User), item (→ Ward Item), household (→ Household)
+- Privacy: Household members only.
+
 ### Privacy findings so far
 
 1. **HouseholdIntro was fully public.** Its photos and files could be seen and searched without signing in.
@@ -214,6 +269,9 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 4. **ProgressPhoto is fully public.** Anyone, even logged out, can see and search kids' job photos, linked to the kid's account. Not changed yet.
 5. **Bid pitch videos are visible to every adult on the platform**, not just the household that posted the job. Not changed yet. It may be intended, but it's worth deciding on purpose.
 6. **Outsource Request is hidden from the household it's sent to.** Only its creator can see it. This might stop the target household from ever seeing the request. Check how the page uses it.
+7. **Transaction is fully public.** Anyone, even logged out, can see and search every kid's token earnings and spending, with notes. Not changed yet. It has no household field, so a fix would go through kid_user's household.
+8. **Auto-binding on money-like fields.** Redemption (tokens_spent and status), Perk Redemption, Reward Streak and Outsource Request (token_amount and status) let their creator auto-save these fields. A member could change their own spend, streak or status, if a page has a linked input. Pass 4 should check which pages actually have such inputs. In the rebuild, only server code should ever change balances and statuses.
+9. **Perk Redemption is hidden from parents.** Only the person who redeemed it sees it, so parents may not see what their kids spent tokens on.
 
 Both types also have an **Owner and staff** rule. Spark added it in the editor, because the Bubble connection can't write role checks.
 
