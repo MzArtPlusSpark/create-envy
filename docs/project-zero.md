@@ -60,7 +60,7 @@ This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
    The balance is a stored number kept in step with the ledger by a "carry" step. The rebuild should make the ledger the only source of truth. Details: [bubble-inventory.md, Pass 3](bubble-inventory.md#pass-3-logic-money-first).
 5. **Sign-in and roles (pass 3, 2026-11-25):**
    - **Code sign-in sends the member's real password to the browser**, and the password is stored as plain text.
-   - **`vu_admin_set_role` has no permission check.** It's only reachable from the app's own pages, but anyone who could start it could make themselves Owner.
+   - **`vu_admin_set_role` had no permission check.** Fixed 2026-11-25 and on Live: it now requires an Owner.
    - Stripe is in **test mode**. The coach and receipt reading use **Claude**, with a private key.
    - The rebuild needs hashed member codes with limited tries, and a server-side check on every role change.
 6. **Some privacy rules may be blocking real features.** For example, Outsource Request is hidden from the household it's sent to, and Perk Redemption is hidden from parents. These need a decision, not just a copy.
@@ -96,7 +96,8 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - [ ] **Spark:** ProgressPhoto's Owner and staff rule (named "c") says "role is Owner or role is Owner". Change the second Owner to Staff and rename the rule, then deploy. Staff can't see progress photos until then; nothing is exposed.
 - [x] **Pass 3, money part:** token purchases, memberships, chore/task/job approval, store redemptions, partner payouts and wish list unlocks.
 - [x] **Pass 3, the rest:** money helpers, outside services, sign-in and roles, and scheduled work. The other non-money workflows were read at overview level only.
-- [ ] **Spark, in Bubble:** add "Current User's role is Owner" to `vu_admin_set_role`'s step; check the Stripe key is private and `sk_test_`; check Logs → Scheduler that `vu_month_cycle` is queued.
+- [x] **`vu_admin_set_role` Owner check:** added by Spark, on Live (checked 2026-11-25).
+- [ ] **Spark, in Bubble:** check the Stripe key is private and `sk_test_`; check Logs → Scheduler that `vu_month_cycle` is queued.
 - [ ] **Pass 4, screens:** what each page shows and does, and which pages have inputs linked to money fields.
 - [ ] **Answer the open questions below.**
 - [ ] **Milestone 2 Progress Package:** this file plus the finished inventory.
