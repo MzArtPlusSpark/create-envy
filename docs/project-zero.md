@@ -81,7 +81,8 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 
 - [x] **Fix live privacy:** Transaction, HouseholdIntro and TeamMember are fixed and on Live.
 - [x] **ProgressPhoto:** locked down on `test` (2026-11-25).
-- [ ] **Spark:** add an Owner and staff rule to ProgressPhoto in the editor, then deploy `test` to Live (this also takes the Redemption fix live).
+- [x] **Deployed to Live (checked 2026-11-25):** ProgressPhoto and Redemption fixes are live. All four once-public types are now private on Live.
+- [ ] **Spark:** ProgressPhoto's Owner and staff rule (named "c") says "role is Owner or role is Owner". Change the second Owner to Staff and rename the rule, then deploy. Staff can't see progress photos until then; nothing is exposed.
 - [ ] **Pass 3, logic:** the steps in all 60 backend workflows and every API Connector call, especially Stripe, tokens and payouts.
 - [ ] **Pass 4, screens:** what each page shows and does, and which pages have inputs linked to money fields.
 - [ ] **Answer the open questions below.**
