@@ -4,7 +4,7 @@ Creation #1 on Creatency. Moving Village UpKeep off Bubble and into code Spark o
 
 - **Bringer:** Spark (Tiara Taylor), who brings the need: own Village UpKeep outright.
 - **Creator:** Spark, with Claude Code, who builds it.
-- **Status:** Milestone 2, Discovery. All four inventory passes are done and the open questions are answered. A few small Bubble checks remain before the Progress Package.
+- **Status:** Milestone 2, Discovery. All four inventory passes are done and the open questions are answered. The Bubble fixes and checks are done too. Next: the Milestone 2 Progress Package.
 - **Details:** the full inventory is in [bubble-inventory.md](bubble-inventory.md). Choices are logged in [decisions.md](decisions.md).
 
 ## Why this creation comes first
@@ -50,7 +50,7 @@ This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
 
 1. **The design is thoughtful.** Most privacy rules are careful and clearly intended, especially Make It Right, school and chat approvals. The rebuild should keep these, not reinvent them.
 2. **Some kids' data was public on Live.** Transaction (every kid's token history), HouseholdIntro, TeamMember and ProgressPhoto (kids' job photos) are now fixed and on Live (checked 2026-11-25). Live has no users yet, so no real family's data was exposed.
-3. **Money-like values can be changed from the page.** Several spend, streak and status fields auto-save from the person who created the record. Redemption's auto-binding is now off on `test` (no page used it). Perk Redemption, Reward Streak and Outsource Request still have it. In the rebuild, **only server code changes balances and statuses.**
+3. **Money-like values can be changed from the page.** Several spend, streak and status fields auto-save from the person who created the record. Auto-binding is now off on Redemption, Perk Redemption, Reward Streak and Outsource Request, and on Live (2026-11-25). In the rebuild, **only server code changes balances and statuses.**
    - Checked 2026-11-25: buying tokens is safe. The wallet's old "charge the card and add tokens on the page" steps are switched off. Buying goes through Stripe Checkout, and `vu_checkout_fulfill` adds tokens only after it verifies the session.
 4. **Money logic (pass 3, money part done 2026-11-25):** buying tokens and memberships check with Stripe before giving anything, and most approvals check who's approving. Three gaps carry into the rebuild:
    - **Memberships are never updated after they start:** there's no Stripe webhook, so a cancelled plan still shows "active".
@@ -93,14 +93,14 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - [x] **Fix live privacy:** Transaction, HouseholdIntro and TeamMember are fixed and on Live.
 - [x] **ProgressPhoto:** locked down on `test` (2026-11-25).
 - [x] **Deployed to Live (checked 2026-11-25):** ProgressPhoto and Redemption fixes are live. All four once-public types are now private on Live.
-- [ ] **Spark:** ProgressPhoto's Owner and staff rule (named "c") says "role is Owner or role is Owner". Change the second Owner to Staff and rename the rule, then deploy. Staff can't see progress photos until then; nothing is exposed.
+- [x] **ProgressPhoto staff rule (fixed by Spark, checked on Live 2026-11-25):** now "role is Owner or role is Staff", renamed "owner and staff".
 - [x] **Pass 3, money part:** token purchases, memberships, chore/task/job approval, store redemptions, partner payouts and wish list unlocks.
 - [x] **Pass 3, the rest:** money helpers, outside services, sign-in and roles, and scheduled work. The other non-money workflows were read at overview level only.
 - [x] **`vu_admin_set_role` Owner check:** added by Spark, on Live (checked 2026-11-25).
 - [x] **Stripe key (checked by Spark 2026-11-25):** a test key, set as "Private key in header", so it stays on Bubble's server.
 - [x] **`vu_month_cycle` (checked 2026-11-25):** Live's logs show it has never run. Nothing needed: Live has no users and Bubble is retiring. The rebuild runs the monthly job on its own schedule.
 - [x] **Pass 4, screens (first slice):** sign-in, onboarding, households, chores, approvals, wallet, store, inventory and chat. Kids can't let themselves into a chat: they start pending until a Parent or Leader approves. The other pages are read when their area is rebuilt.
-- [x] **Auto-binding off (2026-11-25, on `test`):** Perk Redemption, Reward Streak and Outsource Request. The full issue check found nothing broken. Goes to Live with the next deploy.
+- [x] **Auto-binding off (2026-11-25, on `test`):** Perk Redemption, Reward Streak and Outsource Request. The full issue check found nothing broken. On Live (checked 2026-11-25).
 - [x] **Decided:** Sponsor, Partner and Referring agency need a check first (decision 10).
 - [x] **Open questions answered** (decisions 7 to 10).
 - [ ] **Milestone 2 Progress Package:** this file plus the finished inventory.
