@@ -47,7 +47,7 @@ This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
 ## What we learned in Discovery so far
 
 1. **The design is thoughtful.** Most privacy rules are careful and clearly intended, especially Make It Right, school and chat approvals. The rebuild should keep these, not reinvent them.
-2. **Some kids' data is public on Live today.** ProgressPhoto (kids' job photos) and Transaction (every kid's token history) can be seen by anyone, even signed out. Two other types, HouseholdIntro and TeamMember, are fixed on `test` but haven't been deployed to Live. **This should be fixed in Bubble now, before the rebuild is done.**
+2. **Some kids' data would be public on Live.** ProgressPhoto (kids' job photos) and Transaction (every kid's token history) can be seen by anyone, even signed out. Two other types, HouseholdIntro and TeamMember, are fixed on `test` but haven't been deployed to Live. Live has no users yet (confirmed 2026-11-25), so no real family's data is exposed. **Fix this before anyone real signs up.**
 3. **Money-like values can be changed from the page.** Several spend, streak and status fields auto-save from the person who created the record. In the rebuild, **only server code changes balances and statuses.**
 4. **Some privacy rules may be blocking real features.** For example, Outsource Request is hidden from the household it's sent to, and Perk Redemption is hidden from parents. These need a decision, not just a copy.
 5. **There's some cleanup to do.** Perk has two "active" fields, and `mock_2` looks like a leftover page.
@@ -82,15 +82,17 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - [ ] **Answer the open questions below.**
 - [ ] **Milestone 2 Progress Package:** this file plus the finished inventory.
 
+## Answers so far
+
+- **Live users (2026-11-25): none.** Village UpKeep hasn't launched, so there's nobody to move and no real data to bring over.
+- **The switch (proposed, not yet decided):** because there are no users, nothing needs to run side by side. Build the new app, test it, launch it, and retire the Bubble app. Data in Bubble is test data, so it stays behind.
+- **Stripe:** Village UpKeep is part of the Art Plus Spark organization. Bubble already connects to Stripe (the Stripe plugin, plus Stripe Checkout through the API Connector). Still to check: which Stripe account those keys belong to, and whether they're test-mode keys. The rebuild uses test-mode keys until launch, kept in `.env` and never committed.
+
 ## Open questions for Spark
 
 These shape the plan, and only Spark can answer them.
 
-1. **Who uses Village UpKeep on Live today?** About how many households and kids? This decides how urgent the privacy fixes are and how careful the move needs to be.
-2. **How should the switch happen?** Run both apps side by side and move households over a few at a time, or switch everyone on one day?
-3. **Does existing data come along?** Token balances, history and photos? If so, we need an export from Bubble and an import into Postgres.
-4. **Stripe:** keep the same Stripe account, so existing customers and subscriptions carry over?
-5. **The phone app:** the 4 mobile views and push notifications. Is the phone app in use, and does it need to be in the first release?
-6. **Coach:** is the coach an AI, a person or scripted messages? Should parents be able to see coach chats?
-7. **Privacy choices to make on purpose:** should bid pitch videos be visible to every adult or only the household that posted the job? Should parents see perk redemptions? Should the target household see outsource requests?
-8. **`mock_2`:** keep it or drop it?
+1. **The phone app:** native mobile is turned on in Bubble (4 mobile views and push notifications), but with no users it was never in real use. Proposal: launch as a phone-friendly website first, and make a native app a later milestone.
+2. **Coach:** is the coach an AI, a person or scripted messages? Should parents be able to see coach chats?
+3. **Privacy choices to make on purpose:** should bid pitch videos be visible to every adult or only the household that posted the job? Should parents see perk redemptions? Should the target household see outsource requests?
+4. **`mock_2`:** keep it or drop it?
