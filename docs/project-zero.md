@@ -4,7 +4,7 @@ Creation #1 on Creatency. Moving Village UpKeep off Bubble and into code Spark o
 
 - **Bringer:** Spark (Tiara Taylor), who brings the need: own Village UpKeep outright.
 - **Creator:** Spark, with Claude Code, who builds it.
-- **Status:** Milestone 2 (Discovery) is done; see its [Progress Package](progress-package-m2.md). Next: Milestone 3, Definition.
+- **Status:** Milestones 2 and 3 are done ([Discovery](progress-package-m2.md), [Definition](progress-package-m3.md)). Next: Milestone 4, the data model for the foundation.
 - **Details:** the full inventory is in [bubble-inventory.md](bubble-inventory.md). Choices are logged in [decisions.md](decisions.md).
 
 ## Why this creation comes first
@@ -75,7 +75,7 @@ This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
 
 The rebuild follows Creatency's own lifecycle. Milestones 3 to 6 are in CLAUDE.md. Inside Milestone 5, the app is rebuilt one area at a time, each one usable before the next starts.
 
-**Proposed order** (confirm after passes 3 and 4):
+**Order** (confirmed 2026-11-25, decision 14; foundation first):
 
 1. **Foundation:** households, people, roles, sign-in (including member codes) and privacy rules.
 2. **The core loop:** chores, approvals and the token ledger. This is the heart of the app: work, proof, approval and tokens.

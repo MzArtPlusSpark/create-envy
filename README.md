@@ -22,7 +22,9 @@ Creation #1 is Project Zero: moving Village UpKeep from Bubble to code its owner
 - [Village UpKeep: Bubble inventory](docs/bubble-inventory.md)
 - [Parking lot](docs/parking-lot.md)
 - [Progress Package: Milestone 2](docs/progress-package-m2.md)
+- [Progress Package: Milestone 3](docs/progress-package-m3.md)
+- [Brand basics](docs/brand.md)
 
 ## Status
 
-Milestone 2 (Discovery) is done; see its [Progress Package](docs/progress-package-m2.md). Next: Milestone 3 (Definition), locking the stack. See [Project Zero](docs/project-zero.md).
+Milestones 2 (Discovery) and 3 (Definition) are done; see their Progress Packages. Next: Milestone 4, the data model for Village UpKeep's foundation. See [Project Zero](docs/project-zero.md).
