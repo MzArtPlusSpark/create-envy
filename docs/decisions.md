@@ -14,3 +14,4 @@ One line per choice, with the reason. Change a decision by adding a new line, no
 | 8 | 2026-11-25 | Who sees bid pitch videos, perk redemptions and outsource requests is set per household by the person who created the household account | Each household decides its own privacy; the rebuild ships these as household settings |
 | 9 | 2026-11-25 | Drop the `mock_2` page; it is not rebuilt | Leftover page with no real use |
 | 10 | 2026-11-25 | Sponsor, Partner and Referring agency need a check before the role is given; they are no longer self-chosen at sign-up | These roles can put items and offers in front of kids, so they must be approved first |
+| 11 | 2026-11-25 | Village UpKeep's new code gets its own private GitHub repo; create-envy keeps Creatency and the Project Zero record | Each app stays one simple project, and Village UpKeep can be owned or handed off on its own |

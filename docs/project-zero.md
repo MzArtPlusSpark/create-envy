@@ -4,7 +4,7 @@ Creation #1 on Creatency. Moving Village UpKeep off Bubble and into code Spark o
 
 - **Bringer:** Spark (Tiara Taylor), who brings the need: own Village UpKeep outright.
 - **Creator:** Spark, with Claude Code, who builds it.
-- **Status:** Milestone 2, Discovery. All four inventory passes are done and the open questions are answered. The Bubble fixes and checks are done too. Next: the Milestone 2 Progress Package.
+- **Status:** Milestone 2 (Discovery) is done; see its [Progress Package](progress-package-m2.md). Next: Milestone 3, Definition.
 - **Details:** the full inventory is in [bubble-inventory.md](bubble-inventory.md). Choices are logged in [decisions.md](decisions.md).
 
 ## Why this creation comes first
@@ -103,7 +103,8 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - [x] **Auto-binding off (2026-11-25, on `test`):** Perk Redemption, Reward Streak and Outsource Request. The full issue check found nothing broken. On Live (checked 2026-11-25).
 - [x] **Decided:** Sponsor, Partner and Referring agency need a check first (decision 10).
 - [x] **Open questions answered** (decisions 7 to 10).
-- [ ] **Milestone 2 Progress Package:** this file plus the finished inventory.
+- [x] **Codebase (decision 11):** Village UpKeep gets its own repo.
+- [x] **Milestone 2 Progress Package:** [progress-package-m2.md](progress-package-m2.md) (2026-11-25).
 
 ## Answers so far
 
