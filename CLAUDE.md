@@ -22,7 +22,7 @@ Six milestones, following the Creatency lifecycle:
 5. Creation: first screens (landing, sign-in, My Creations, three-zone workspace, milestones, Dormant)
 6. Ownership: ship on AWS us-east-2 (billing alarm, GitHub Actions CI, Amplify Hosting, RDS), optional Terraform
 
-Proposed stack: Next.js + TypeScript, PostgreSQL + Prisma, Auth.js. See docs/decisions.md.
+Stack (locked 2026-11-25, decisions 12 and 13): Next.js + TypeScript, PostgreSQL + Prisma, Better Auth (not Auth.js), AWS us-east-2. Village UpKeep's code lives in its own repo (decision 11). See docs/decisions.md.
 
 ## Brand
 Navy #1B1F3B, mustard gold #F2B84B, white, slate grey #4A4F6E (plus indigo #3236A8 for links). Space Grotesk for titles, Inter for body. Gold is earned: it means done, progress or Kee. Kee is the gold ownership companion; never redraw or recolour Kee.
