@@ -4,7 +4,7 @@ Creation #1 on Creatency. Moving Village UpKeep off Bubble and into code Spark o
 
 - **Bringer:** Spark (Tiara Taylor), who brings the need: own Village UpKeep outright.
 - **Creator:** Spark, with Claude Code, who builds it.
-- **Status:** Milestone 2, Discovery. Passes 1 and 2 of the inventory are done. Passes 3 and 4 are still to come.
+- **Status:** Milestone 2, Discovery. All four inventory passes are done and the open questions are answered. A few small Bubble checks remain before the Progress Package.
 - **Details:** the full inventory is in [bubble-inventory.md](bubble-inventory.md). Choices are logged in [decisions.md](decisions.md).
 
 ## Why this creation comes first
@@ -63,8 +63,8 @@ This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
    - **`vu_admin_set_role` had no permission check.** Fixed 2026-11-25 and on Live: it now requires an Owner.
    - Stripe is in **test mode**. The coach and receipt reading use **Claude**, with a private key.
    - The rebuild needs hashed member codes with limited tries, and a server-side check on every role change.
-6. **Some privacy rules may be blocking real features.** For example, Outsource Request is hidden from the household it's sent to, and Perk Redemption is hidden from parents. These need a decision, not just a copy.
-7. **There's some cleanup to do.** Perk has two "active" fields, and `mock_2` looks like a leftover page.
+6. **Some privacy rules may be blocking real features.** For example, Outsource Request is hidden from the household it's sent to, and Perk Redemption is hidden from parents. Decided: these become household settings (decision 8).
+7. **There's some cleanup to do.** Perk has two "active" fields, and `mock_2` is a leftover page (dropped, decision 9).
 
 **Rules for the rebuild that come from this:**
 - Every record type starts private ("nobody"), and access is added on purpose.
@@ -100,8 +100,8 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - [ ] **Spark, in Bubble:** check the Stripe key is private and `sk_test_`; check Logs → Scheduler that `vu_month_cycle` is queued.
 - [x] **Pass 4, screens (first slice):** sign-in, onboarding, households, chores, approvals, wallet, store, inventory and chat. Kids can't let themselves into a chat: they start pending until a Parent or Leader approves. The other pages are read when their area is rebuilt.
 - [ ] **Next Bubble session:** turn off auto-binding on Perk Redemption, Reward Streak and Outsource Request (then run the issue check).
-- [ ] **Decide:** should Sponsor, Partner and Referring agency be self-chosen at sign-up, or need a check first?
-- [ ] **Answer the open questions below.**
+- [x] **Decided:** Sponsor, Partner and Referring agency need a check first (decision 10).
+- [x] **Open questions answered** (decisions 7 to 10).
 - [ ] **Milestone 2 Progress Package:** this file plus the finished inventory.
 
 ## Answers so far
@@ -111,10 +111,11 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - **The phone app (decided 2026-11-25, decision 6):** launch as a phone-friendly website. A native app is a later milestone (see the [parking lot](parking-lot.md)).
 - **Stripe:** Village UpKeep is part of the Art Plus Spark organization. Bubble already connects to Stripe (the Stripe plugin, plus Stripe Checkout through the API Connector). Pass 3 found they're test mode (the saved session id is `cs_test_`). Still to check: which Stripe account they belong to. The rebuild uses test-mode keys until launch, kept in `.env` and never committed.
 
+- **Coach chats (decision 7):** each parent chooses whether to see their kids' coach chats. The rebuild makes this a parent setting.
+- **Bid videos, perk redemptions, outsource requests (decision 8):** the person who created the household account decides who sees these, for their own household. The rebuild ships them as household settings instead of fixed rules.
+- **`mock_2` (decision 9):** dropped. It isn't rebuilt. It's left alone in Bubble, which retires anyway.
+- **Sponsor, Partner, Referring agency (decision 10):** these need a check before the role is given. In the rebuild, picking one at sign-up makes a request that an Owner or Staff member approves.
+
 ## Open questions for Spark
 
-These shape the plan, and only Spark can answer them.
-
-1. **Coach:** it's an AI (Claude, found in pass 3). Still to decide: should parents be able to see coach chats?
-2. **Privacy choices to make on purpose:** should bid pitch videos be visible to every adult or only the household that posted the job? Should parents see perk redemptions? Should the target household see outsource requests?
-3. **`mock_2`:** keep it or drop it?
+None right now. New questions get added here as the build raises them.

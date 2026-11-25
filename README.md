@@ -24,4 +24,4 @@ Creation #1 is Project Zero: moving Village UpKeep from Bubble to code its owner
 
 ## Status
 
-Milestone 2 (Discovery): Village UpKeep's Bubble app is inventoried; passes 3 and 4 are next. See [Project Zero](docs/project-zero.md).
+Milestone 2 (Discovery): Village UpKeep's Bubble app is inventoried (all four passes) and the open questions are answered; a few small Bubble checks remain. See [Project Zero](docs/project-zero.md).
