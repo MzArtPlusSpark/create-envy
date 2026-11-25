@@ -201,7 +201,7 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 
 **ProgressPhoto** (a kid's photo showing progress on a Job)
 - job (→ Job), kid_user (→ User), photo_image (image), caption (text), progress_percent (number), captured_via_camera (yes/no)
-- Privacy: ⚠️ **Everyone sees everything, including the photos, even when logged out.**
+- Privacy: was open to everyone, including the photos. **Locked down 2026-11-25 on `test`** (see Privacy findings, item 4).
 
 ### Tokens, store and rewards
 
@@ -387,7 +387,7 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
    - **Fixed 2026-11-21 in Bubble `test`, deployed to Live with the 2026-11-25 deploy.** Now visible to the kid themselves, the kid leading the bid, the kid's own household and the household that posted the job. Everyone else sees nothing.
    - Known gap: teammates from *different* households can't see each other's TeamMember records. The bid leader still sees everyone on the team.
 3. **Device can be searched by anyone**, which reveals which users have the phone app. Not changed yet: the Bubble connection can't edit this built-in type.
-4. **ProgressPhoto is fully public.** Anyone, even logged out, can see and search kids' job photos, linked to the kid's account. **Still open: checked on Live 2026-11-25, still public.**
+4. **ProgressPhoto was fully public.** Anyone, even logged out, could see and search kids' job photos, linked to the kid's account. **Fixed 2026-11-25 on `test`, not yet on Live.** Everyone else now sees nothing. Viewing is allowed for: the kid in the photo; the creator; the kid's household (all members, like Chore); and the household that posted the job. No auto-binding. Bubble's full issue check was clean afterwards. Still to add by hand in the editor: an Owner and staff rule.
 5. **Bid pitch videos are visible to every adult on the platform**, not just the household that posted the job. Not changed yet. It may be intended, but it's worth deciding on purpose.
 6. **Outsource Request is hidden from the household it's sent to.** Only its creator can see it. This might stop the target household from ever seeing the request. Check how the page uses it.
 7. **Transaction was fully public. Fixed 2026-11-25 and deployed to Live (checked on Live).** Everyone else now sees nothing. Viewing is allowed for: the kid on the transaction; household approvers (through kid_user's household, since Transaction has no household field); the creator; and Owner and staff. No rule allows auto-binding.
@@ -398,7 +398,7 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 10. **The chat directory is open to every signed-in user**: titles, types and households of all chats, though not the messages. Minor.
 11. **Coach Messages are hidden from parents.** Probably intended. Decide it on purpose for the rebuild.
 
-**Summary after all 47 data types:** 4 types were fully public. HouseholdIntro, TeamMember and Transaction are fixed and on Live; ProgressPhoto is not yet. Device can be searched by anyone. Everything else is limited to households, members or roles, and most of it is designed with care.
+**Summary after all 47 data types:** 4 types were fully public. HouseholdIntro, TeamMember and Transaction are fixed and on Live; ProgressPhoto is fixed on `test` and waits for the next deploy. Device can be searched by anyone. Everything else is limited to households, members or roles, and most of it is designed with care.
 
 HouseholdIntro, TeamMember and Transaction also have an **Owner and staff** rule. Spark added it in the editor, because the Bubble connection can't write role checks.
 

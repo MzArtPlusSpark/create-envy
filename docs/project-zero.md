@@ -49,7 +49,7 @@ This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
 ## What we learned in Discovery so far
 
 1. **The design is thoughtful.** Most privacy rules are careful and clearly intended, especially Make It Right, school and chat approvals. The rebuild should keep these, not reinvent them.
-2. **Some kids' data was public on Live.** Transaction (every kid's token history), HouseholdIntro and TeamMember are now fixed and on Live (checked 2026-11-25). **ProgressPhoto (kids' job photos) is still public on Live.** Live has no users yet, so no real family's data was exposed.
+2. **Some kids' data was public on Live.** Transaction (every kid's token history), HouseholdIntro and TeamMember are now fixed and on Live (checked 2026-11-25). ProgressPhoto (kids' job photos) is fixed on `test` and goes live with the next deploy. Live has no users yet, so no real family's data was exposed.
 3. **Money-like values can be changed from the page.** Several spend, streak and status fields auto-save from the person who created the record. Redemption's auto-binding is now off on `test` (no page used it). Perk Redemption, Reward Streak and Outsource Request still have it. In the rebuild, **only server code changes balances and statuses.**
    - Checked 2026-11-25: buying tokens is safe. The wallet's old "charge the card and add tokens on the page" steps are switched off. Buying goes through Stripe Checkout, and `vu_checkout_fulfill` adds tokens only after it verifies the session.
 4. **Some privacy rules may be blocking real features.** For example, Outsource Request is hidden from the household it's sent to, and Perk Redemption is hidden from parents. These need a decision, not just a copy.
@@ -80,7 +80,8 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 ## What's left in Discovery
 
 - [x] **Fix live privacy:** Transaction, HouseholdIntro and TeamMember are fixed and on Live.
-- [ ] **ProgressPhoto:** lock it down on `test`, then deploy to Live (the Redemption auto-binding fix goes live with it).
+- [x] **ProgressPhoto:** locked down on `test` (2026-11-25).
+- [ ] **Spark:** add an Owner and staff rule to ProgressPhoto in the editor, then deploy `test` to Live (this also takes the Redemption fix live).
 - [ ] **Pass 3, logic:** the steps in all 60 backend workflows and every API Connector call, especially Stripe, tokens and payouts.
 - [ ] **Pass 4, screens:** what each page shows and does, and which pages have inputs linked to money fields.
 - [ ] **Answer the open questions below.**
