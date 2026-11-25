@@ -52,8 +52,14 @@ This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
 2. **Some kids' data was public on Live.** Transaction (every kid's token history), HouseholdIntro and TeamMember are now fixed and on Live (checked 2026-11-25). ProgressPhoto (kids' job photos) is fixed on `test` and goes live with the next deploy. Live has no users yet, so no real family's data was exposed.
 3. **Money-like values can be changed from the page.** Several spend, streak and status fields auto-save from the person who created the record. Redemption's auto-binding is now off on `test` (no page used it). Perk Redemption, Reward Streak and Outsource Request still have it. In the rebuild, **only server code changes balances and statuses.**
    - Checked 2026-11-25: buying tokens is safe. The wallet's old "charge the card and add tokens on the page" steps are switched off. Buying goes through Stripe Checkout, and `vu_checkout_fulfill` adds tokens only after it verifies the session.
-4. **Some privacy rules may be blocking real features.** For example, Outsource Request is hidden from the household it's sent to, and Perk Redemption is hidden from parents. These need a decision, not just a copy.
-5. **There's some cleanup to do.** Perk has two "active" fields, and `mock_2` looks like a leftover page.
+4. **Money logic (pass 3, money part done 2026-11-25):** buying tokens and memberships check with Stripe before giving anything, and most approvals check who's approving. Three gaps carry into the rebuild:
+   - **Memberships are never updated after they start:** there's no Stripe webhook, so a cancelled plan still shows "active".
+   - **Job approval doesn't check who's calling it.**
+   - **Store redemptions run on the page**, and stock isn't checked.
+
+   The balance is a stored number kept in step with the ledger by a "carry" step. The rebuild should make the ledger the only source of truth. Details: [bubble-inventory.md, Pass 3](bubble-inventory.md#pass-3-logic-money-first).
+5. **Some privacy rules may be blocking real features.** For example, Outsource Request is hidden from the household it's sent to, and Perk Redemption is hidden from parents. These need a decision, not just a copy.
+6. **There's some cleanup to do.** Perk has two "active" fields, and `mock_2` looks like a leftover page.
 
 **Rules for the rebuild that come from this:**
 - Every record type starts private ("nobody"), and access is added on purpose.
@@ -83,7 +89,8 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - [x] **ProgressPhoto:** locked down on `test` (2026-11-25).
 - [x] **Deployed to Live (checked 2026-11-25):** ProgressPhoto and Redemption fixes are live. All four once-public types are now private on Live.
 - [ ] **Spark:** ProgressPhoto's Owner and staff rule (named "c") says "role is Owner or role is Owner". Change the second Owner to Staff and rename the rule, then deploy. Staff can't see progress photos until then; nothing is exposed.
-- [ ] **Pass 3, logic:** the steps in all 60 backend workflows and every API Connector call, especially Stripe, tokens and payouts.
+- [x] **Pass 3, money part:** token purchases, memberships, chore/task/job approval, store redemptions, partner payouts and wish list unlocks.
+- [ ] **Pass 3, the rest:** the remaining money helpers, the API Connector call setup (which Stripe key), and every non-money workflow (now 77 in total).
 - [ ] **Pass 4, screens:** what each page shows and does, and which pages have inputs linked to money fields.
 - [ ] **Answer the open questions below.**
 - [ ] **Milestone 2 Progress Package:** this file plus the finished inventory.

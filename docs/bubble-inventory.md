@@ -406,8 +406,62 @@ Bubble savepoint taken before the fixes: `1795282240017` (to roll back if needed
 
 **For the rebuild:** privacy should be decided per record type from the start, with "nobody" as the default, never "everyone."
 
+## Pass 3: logic (money first)
+
+Read 2026-11-25 from the `test` version. This part covers the workflows that move tokens or real money. The other workflows (effort, scoring, school, keep, Make It Right, shopping, earn lookup) and the API Connector call setup are still to read.
+
+### How a token balance works
+
+Each User has a stored **Token Balance** (`wallet_balance`) and a **`ledger_carry`** number. Most money workflows follow the same three steps:
+
+1. **Carry:** set `ledger_carry` = balance − the sum of that user's Transactions. This records any gap between the stored balance and the ledger before the change.
+2. **Ledger:** create a Transaction for the amount (positive to earn or deposit, negative to spend or fund).
+3. **Reconcile:** set the balance from the new numbers.
+
+So the ledger plus the carry should always explain the balance. **Chore approval doesn't follow this pattern:** it adds to the balance and writes a Transaction, but skips the carry step.
+
+**For the rebuild:** make the Transaction ledger the only source of truth. Work the balance out from it (or check it against it on every write), and do each money change in one database transaction so it can't half-happen.
+
+### Buying tokens (Stripe Checkout)
+
+- **wallet page, "Buy" button:** only Parents, Leaders and Owners, with an amount of at least $1. It creates a Stripe Checkout Session, with the amount × 100 in cents and `client_reference_id` = the user's id, then sends them to Stripe. Older "charge the card and add tokens right here" steps are still on the workflow but **disabled**.
+- **Back from Stripe:** the wallet page, on load, calls `vu_checkout_fulfill` with the `session_id`.
+- **`vu_checkout_fulfill`:**
+  1. Asks Stripe for the session.
+  2. **Stops (credits nothing) if** payment_status isn't "paid", the session has no client_reference_id, or a BundlePurchase with that session id already exists. That last check stops double-crediting on reload.
+  3. Finds the buyer by client_reference_id, then does carry, a Deposit Transaction of amount × **TokensPerDollar**, a BundlePurchase (dollars, tokens, credit = amount × **CreditPerDollar**, session id) and reconcile.
+- Tokens go to the **buyer's own balance** (the parent), not a kid's.
+- Small gap: two loads at the same moment could both pass the "already credited?" check before either saves. A database unique key on the Stripe session id fixes this in the rebuild.
+
+### Memberships (Stripe subscriptions)
+
+- **`vu_subscription_fulfill`** (session_id, tier): asks Stripe for the session. It stops unless it's paid and client_reference_id = the household id + "__" + the tier name. Then it sets the Household's tier, Stripe customer id, subscription id, and `subscription_status` = "active".
+- ⚠️ **Nothing ever updates the membership after that.** There's no Stripe webhook, so a cancelled subscription or a failed renewal still shows as "active" with the paid tier. **For the rebuild:** use Stripe webhooks (`customer.subscription.updated` / `deleted`, `invoice.payment_failed`) as the source of truth for tier and status.
+
+### Earning
+
+- **`vu_chore_approve`** (chore): stops unless the chore is *Waiting for approval*, it's in the approver's household, the approver is a Parent, Leader, Owner or Staff, and **the approver isn't the kid it's assigned to**. Then it marks the chore approved, adds `token_value` to the kid's balance (plus chores_approved and the Ward meters), and writes a "Chore approved" Reward Payout Transaction. *No carry step (see above).*
+- **`vu_task_approve`** (task): runs only if the caller is logged in and **is the task's poster**, the task is Completed (not Paid Out or Cancelled), completed_by is set, payout_requested isn't already yes, and **the poster's balance covers base_reward**. Then it takes base_reward from the poster ("Reward Funding", negative) and gives it to the kid who completed it, with carry and reconcile on both sides. Finally it settles any Task Incentives.
+- **`vu_task_myself`:** the poster marks a task done by themselves. No tokens move, but incentives are settled.
+- **`vu_job_approve`** (job): runs if the job isn't already Completed and **the parent_user's balance covers pay_amount**. Then the parent pays pay_amount; the bid leader gets pay − (floor(pay ÷ (team + 1)) × team), and each teammate gets floor(pay ÷ (team + 1)) through `vu_job_team_share`. Any rounding remainder goes to the leader.
+  - ⚠️ **It doesn't check who is calling it.** Unlike task and chore approval, there's no "caller is the job's parent" test inside the workflow. It isn't a public API, so it can only be started from the app's own pages, and those may check. But the check belongs in the workflow. **For the rebuild:** every money action checks permission on the server.
+
+### Spending
+
+- **Token store, "Redeem"** (token_store page): runs on the page, not in a backend workflow. It checks that the user is logged in, their balance ≥ token cost and the item is Approved. Then it does carry, creates a Redemption, writes a spend Transaction and reconciles. Perks and activities follow the same pattern.
+  - Stock goes down only when Inventory marks the redemption delivered (portal_inventory). A popular item can be redeemed more times than there's stock.
+  - **For the rebuild:** do redemptions on the server, inside one database transaction that checks the balance and the stock.
+- **"Record partner payout on a new redemption"** (a database trigger): when a Redemption is created, it sets the supplier to the Store Item's creator, payout_owed to the item's `partner_payout_per_item`, and payout_paid = no. **Nothing here pays the partner.** Paying out is done by hand, outside the app.
+- **`vu_reward_unlock`** (wish list item): runs if the caller is the kid or a Parent, Leader or Owner in the kid's household, the item isn't already unlocked, **the kid's balance covers the price**, and parents have contributed at least the target credit. Then it unlocks the item, creates a Redemption and spends the tokens (carry, Transaction, reconcile).
+
+### Still to read in pass 3
+
+- vu_task_incentive_settle, vu_job_team_share (amounts are known from vu_job_approve), vu_reward_delivered, vu_bundle_credit, vu_contribution_log, effort_from_payout, earn_task_verified
+- The API Connector calls themselves: which Stripe key they use (test or live), and whether the key is marked private
+- Every non-money workflow: effort, scoring, school, keep, Make It Right, chores reset and rotation, shopping receipt reading, earn lookup
+
 ## Next passes
 
-1. **Pass 2, data:** read every data type's fields and privacy rules, and every option set's values. This becomes the starting point for the Prisma data model in milestone 4.
-2. **Pass 3, logic:** read the steps of each backend workflow and the API Connector calls, especially anything that touches money (Stripe, tokens, payouts).
+1. **Pass 2, data:** done.
+2. **Pass 3, logic:** money workflows read (above). Finish the list under "Still to read in pass 3".
 3. **Pass 4, screens:** note what each page shows and does, so milestone 5 knows what to rebuild first.
