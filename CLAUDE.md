@@ -32,4 +32,5 @@ Navy #1B1F3B, mustard gold #F2B84B, white, slate grey #4A4F6E (plus indigo #3236
 ## Rules
 - Never commit secrets: .env files stay out (see .gitignore).
 - Log every real decision as a new row in docs/decisions.md.
+- Ideas that fail the North Star, or aren't for now, go in docs/parking-lot.md, not into the build.
 - Each milestone ends with its Progress Package (listed in the checklist).

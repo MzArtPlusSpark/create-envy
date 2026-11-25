@@ -42,13 +42,16 @@ A household app where kids earn tokens for real effort at home, at school and in
 | Backend workflows | 60 |
 | Plugins | 3 (Stripe, API Connector, Copy to Clipboard) |
 
+These counts are from the passes on 2026-11-21. On 2026-11-25 the `test` version had grown to 57 data types, 52 option sets, 39 pages, 77 backend workflows and 4 plugins (a camera plugin was added). Passes 3 and 4 should work from the current `test` version.
+
 This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
 
 ## What we learned in Discovery so far
 
 1. **The design is thoughtful.** Most privacy rules are careful and clearly intended, especially Make It Right, school and chat approvals. The rebuild should keep these, not reinvent them.
-2. **Some kids' data would be public on Live.** ProgressPhoto (kids' job photos) and Transaction (every kid's token history) can be seen by anyone, even signed out. Two other types, HouseholdIntro and TeamMember, are fixed on `test` but haven't been deployed to Live. Live has no users yet (confirmed 2026-11-25), so no real family's data is exposed. **Fix this before anyone real signs up.**
-3. **Money-like values can be changed from the page.** Several spend, streak and status fields auto-save from the person who created the record. In the rebuild, **only server code changes balances and statuses.**
+2. **Some kids' data was public on Live.** Transaction (every kid's token history), HouseholdIntro and TeamMember are now fixed and on Live (checked 2026-11-25). **ProgressPhoto (kids' job photos) is still public on Live.** Live has no users yet, so no real family's data was exposed.
+3. **Money-like values can be changed from the page.** Several spend, streak and status fields auto-save from the person who created the record. Redemption's auto-binding is now off on `test` (no page used it). Perk Redemption, Reward Streak and Outsource Request still have it. In the rebuild, **only server code changes balances and statuses.**
+   - Checked 2026-11-25: buying tokens is safe. The wallet's old "charge the card and add tokens on the page" steps are switched off. Buying goes through Stripe Checkout, and `vu_checkout_fulfill` adds tokens only after it verifies the session.
 4. **Some privacy rules may be blocking real features.** For example, Outsource Request is hidden from the household it's sent to, and Perk Redemption is hidden from parents. These need a decision, not just a copy.
 5. **There's some cleanup to do.** Perk has two "active" fields, and `mock_2` looks like a leftover page.
 
@@ -76,7 +79,8 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 
 ## What's left in Discovery
 
-- [ ] **Fix live privacy:** lock down ProgressPhoto and Transaction on `test`, then deploy all four fixes to Live.
+- [x] **Fix live privacy:** Transaction, HouseholdIntro and TeamMember are fixed and on Live.
+- [ ] **ProgressPhoto:** lock it down on `test`, then deploy to Live (the Redemption auto-binding fix goes live with it).
 - [ ] **Pass 3, logic:** the steps in all 60 backend workflows and every API Connector call, especially Stripe, tokens and payouts.
 - [ ] **Pass 4, screens:** what each page shows and does, and which pages have inputs linked to money fields.
 - [ ] **Answer the open questions below.**
@@ -85,14 +89,14 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 ## Answers so far
 
 - **Live users (2026-11-25): none.** Village UpKeep hasn't launched, so there's nobody to move and no real data to bring over.
-- **The switch (proposed, not yet decided):** because there are no users, nothing needs to run side by side. Build the new app, test it, launch it, and retire the Bubble app. Data in Bubble is test data, so it stays behind.
+- **The switch (decided 2026-11-25, decision 5):** start fresh. Nothing runs side by side and no data moves. The only real data in Bubble is Spark's own, and Spark will re-enter it. Build the new app, test it, launch it, and retire the Bubble app.
+- **The phone app (decided 2026-11-25, decision 6):** launch as a phone-friendly website. A native app is a later milestone (see the [parking lot](parking-lot.md)).
 - **Stripe:** Village UpKeep is part of the Art Plus Spark organization. Bubble already connects to Stripe (the Stripe plugin, plus Stripe Checkout through the API Connector). Still to check: which Stripe account those keys belong to, and whether they're test-mode keys. The rebuild uses test-mode keys until launch, kept in `.env` and never committed.
 
 ## Open questions for Spark
 
 These shape the plan, and only Spark can answer them.
 
-1. **The phone app:** native mobile is turned on in Bubble (4 mobile views and push notifications), but with no users it was never in real use. Proposal: launch as a phone-friendly website first, and make a native app a later milestone.
-2. **Coach:** is the coach an AI, a person or scripted messages? Should parents be able to see coach chats?
-3. **Privacy choices to make on purpose:** should bid pitch videos be visible to every adult or only the household that posted the job? Should parents see perk redemptions? Should the target household see outsource requests?
-4. **`mock_2`:** keep it or drop it?
+1. **Coach:** is the coach an AI, a person or scripted messages? Should parents be able to see coach chats?
+2. **Privacy choices to make on purpose:** should bid pitch videos be visible to every adult or only the household that posted the job? Should parents see perk redemptions? Should the target household see outsource requests?
+3. **`mock_2`:** keep it or drop it?

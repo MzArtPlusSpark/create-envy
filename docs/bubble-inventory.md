@@ -210,7 +210,7 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 - transaction_type (→ transactiontype), transaction_category (→ Transaction Category)
 - What it came from: chore (→ Chore), task (→ Task), job (→ Job)
 - No household field: the household is only known through kid_user.
-- Privacy: ⚠️ **Everyone sees everything, even when logged out.** That's every kid's earnings history.
+- Privacy: was open to everyone, even logged out. **Fixed 2026-11-25 and on Live** (see Privacy findings, item 7).
 
 **Store Item** (rewards kids can buy with tokens, often supplied by a sponsor or partner)
 - item_name, description, item_image (image), token_cost, stock_quantity (numbers)
@@ -227,7 +227,7 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 - Delivery: delivered_by (→ User), delivered_date
 - Partner payout: supplier (→ User), payout_owed (number), payout_paid (yes/no), payout_paid_date
 - Privacy: The redeemer, the creator, and Inventory, Owner and Staff.
-- ⚠️ The creator rule has **auto-binding** turned on for user, store_item, tokens_spent and status. If a page has an input linked to those fields, a kid could change what they spent, or mark their own redemption as delivered.
+- The creator rule had **auto-binding** on for user, store_item, tokens_spent and status. **Turned off 2026-11-25 on `test`** (see Privacy findings, item 8).
 
 **BundlePurchase** (a parent buying a token bundle with real money)
 - buyer (→ User), household (→ Household), bundle_name, dollars_paid, tokens_granted, credit_granted, stripe_charge_ref
@@ -382,23 +382,25 @@ Every type also has Bubble's built-in fields: Created By, Created Date, Modified
 ### Privacy findings so far
 
 1. **HouseholdIntro was fully public.** Its photos and files could be seen and searched without signing in.
-   - **Fixed 2026-11-21 in Bubble `test` (Main), not yet deployed to Live.** Now only the sender and recipient households can see an intro. Everyone else sees nothing.
+   - **Fixed 2026-11-21 in Bubble `test` (Main), on Live by 2026-11-25 (checked on Live).** Now only the sender and recipient households can see an intro. Everyone else sees nothing.
 2. **TeamMember was fully public.** Anyone could see which kids accepted which job invitations.
-   - **Fixed 2026-11-21 in Bubble `test`, not yet deployed to Live.** Now visible to the kid themselves, the kid leading the bid, the kid's own household and the household that posted the job. Everyone else sees nothing.
+   - **Fixed 2026-11-21 in Bubble `test`, deployed to Live with the 2026-11-25 deploy.** Now visible to the kid themselves, the kid leading the bid, the kid's own household and the household that posted the job. Everyone else sees nothing.
    - Known gap: teammates from *different* households can't see each other's TeamMember records. The bid leader still sees everyone on the team.
 3. **Device can be searched by anyone**, which reveals which users have the phone app. Not changed yet: the Bubble connection can't edit this built-in type.
-4. **ProgressPhoto is fully public.** Anyone, even logged out, can see and search kids' job photos, linked to the kid's account. Not changed yet.
+4. **ProgressPhoto is fully public.** Anyone, even logged out, can see and search kids' job photos, linked to the kid's account. **Still open: checked on Live 2026-11-25, still public.**
 5. **Bid pitch videos are visible to every adult on the platform**, not just the household that posted the job. Not changed yet. It may be intended, but it's worth deciding on purpose.
 6. **Outsource Request is hidden from the household it's sent to.** Only its creator can see it. This might stop the target household from ever seeing the request. Check how the page uses it.
-7. **Transaction is fully public.** Anyone, even logged out, can see and search every kid's token earnings and spending, with notes. Not changed yet. It has no household field, so a fix would go through kid_user's household.
-8. **Auto-binding on money-like fields.** Redemption (tokens_spent and status), Perk Redemption, Reward Streak and Outsource Request (token_amount and status) let their creator auto-save these fields. A member could change their own spend, streak or status, if a page has a linked input. Pass 4 should check which pages actually have such inputs. In the rebuild, only server code should ever change balances and statuses.
+7. **Transaction was fully public. Fixed 2026-11-25 and deployed to Live (checked on Live).** Everyone else now sees nothing. Viewing is allowed for: the kid on the transaction; household approvers (through kid_user's household, since Transaction has no household field); the creator; and Owner and staff. No rule allows auto-binding.
+8. **Auto-binding on money-like fields.** Redemption (tokens_spent and status), Perk Redemption, Reward Streak and Outsource Request (token_amount and status) let their creator auto-save these fields. A member could change their own spend, streak or status, if a page has a linked input.
+   - **Redemption fixed 2026-11-25 on `test` (not yet on Live).** No page had inputs linked to it: redemptions are made by button workflows on token_store and portal_inventory. So its auto-binding was turned off, and Bubble's full issue check was clean before and after. Redemption is not exposed through the Data API, so the leftover API create/modify/delete settings on its creator rule have no effect.
+   - Perk Redemption, Reward Streak and Outsource Request are not changed yet. Pass 4 should check which pages actually have such inputs. In the rebuild, only server code should ever change balances and statuses.
 9. **Perk Redemption is hidden from parents.** Only the person who redeemed it sees it, so parents may not see what their kids spent tokens on.
 10. **The chat directory is open to every signed-in user**: titles, types and households of all chats, though not the messages. Minor.
 11. **Coach Messages are hidden from parents.** Probably intended. Decide it on purpose for the rebuild.
 
-**Summary after all 47 data types:** 3 types were fully public (HouseholdIntro and TeamMember are fixed on `test`; ProgressPhoto and Transaction are not yet). Device can be searched by anyone. Everything else is limited to households, members or roles, and most of it is designed with care.
+**Summary after all 47 data types:** 4 types were fully public. HouseholdIntro, TeamMember and Transaction are fixed and on Live; ProgressPhoto is not yet. Device can be searched by anyone. Everything else is limited to households, members or roles, and most of it is designed with care.
 
-Both types also have an **Owner and staff** rule. Spark added it in the editor, because the Bubble connection can't write role checks.
+HouseholdIntro, TeamMember and Transaction also have an **Owner and staff** rule. Spark added it in the editor, because the Bubble connection can't write role checks.
 
 Bubble savepoint taken before the fixes: `1795282240017` (to roll back if needed).
 
