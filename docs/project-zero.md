@@ -97,9 +97,10 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - [x] **Pass 3, money part:** token purchases, memberships, chore/task/job approval, store redemptions, partner payouts and wish list unlocks.
 - [x] **Pass 3, the rest:** money helpers, outside services, sign-in and roles, and scheduled work. The other non-money workflows were read at overview level only.
 - [x] **`vu_admin_set_role` Owner check:** added by Spark, on Live (checked 2026-11-25).
-- [ ] **Spark, in Bubble:** check the Stripe key is private and `sk_test_`; check Logs → Scheduler that `vu_month_cycle` is queued.
+- [ ] **Spark, in Bubble:** check the Stripe key is private and `sk_test_` (the tool can't see keys set on the collection).
+- [x] **`vu_month_cycle` (checked 2026-11-25):** Live's logs show it has never run. Nothing needed: Live has no users and Bubble is retiring. The rebuild runs the monthly job on its own schedule.
 - [x] **Pass 4, screens (first slice):** sign-in, onboarding, households, chores, approvals, wallet, store, inventory and chat. Kids can't let themselves into a chat: they start pending until a Parent or Leader approves. The other pages are read when their area is rebuilt.
-- [ ] **Next Bubble session:** turn off auto-binding on Perk Redemption, Reward Streak and Outsource Request (then run the issue check).
+- [x] **Auto-binding off (2026-11-25, on `test`):** Perk Redemption, Reward Streak and Outsource Request. The full issue check found nothing broken. Goes to Live with the next deploy.
 - [x] **Decided:** Sponsor, Partner and Referring agency need a check first (decision 10).
 - [x] **Open questions answered** (decisions 7 to 10).
 - [ ] **Milestone 2 Progress Package:** this file plus the finished inventory.
