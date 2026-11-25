@@ -49,7 +49,7 @@ This is a large app. It will be rebuilt in pieces, not all at once (decision 1).
 ## What we learned in Discovery so far
 
 1. **The design is thoughtful.** Most privacy rules are careful and clearly intended, especially Make It Right, school and chat approvals. The rebuild should keep these, not reinvent them.
-2. **Some kids' data was public on Live.** Transaction (every kid's token history), HouseholdIntro and TeamMember are now fixed and on Live (checked 2026-11-25). ProgressPhoto (kids' job photos) is fixed on `test` and goes live with the next deploy. Live has no users yet, so no real family's data was exposed.
+2. **Some kids' data was public on Live.** Transaction (every kid's token history), HouseholdIntro, TeamMember and ProgressPhoto (kids' job photos) are now fixed and on Live (checked 2026-11-25). Live has no users yet, so no real family's data was exposed.
 3. **Money-like values can be changed from the page.** Several spend, streak and status fields auto-save from the person who created the record. Redemption's auto-binding is now off on `test` (no page used it). Perk Redemption, Reward Streak and Outsource Request still have it. In the rebuild, **only server code changes balances and statuses.**
    - Checked 2026-11-25: buying tokens is safe. The wallet's old "charge the card and add tokens on the page" steps are switched off. Buying goes through Stripe Checkout, and `vu_checkout_fulfill` adds tokens only after it verifies the session.
 4. **Money logic (pass 3, money part done 2026-11-25):** buying tokens and memberships check with Stripe before giving anything, and most approvals check who's approving. Three gaps carry into the rebuild:
