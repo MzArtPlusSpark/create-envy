@@ -505,8 +505,55 @@ So the ledger plus the carry should always explain the balance. **Chore approval
 
 These were read at the name and trigger level only. They don't move tokens or money: the 10 effort_* workflows other than effort_score and effort_from_payout, mir_add_member, mir_owned, mir_check_done (Make It Right), school_notify_steward, school_plan_started, school_check_turned_in, school_work_turned_in, walk_add_finding, vu_ward_help, shop_price_line, earn_lookup_read, earn_lookup_fallback, earn_plan_start, earn_plan_line, vu_check_email, vu_check_invite. Read them in detail when their area is rebuilt.
 
+## Pass 4: screens (first slice first)
+
+Read 2026-11-25 from `test`. This pass read in detail the pages the first rebuild slice needs (sign-in, households, chores, approvals, wallet, store), plus the chat pages for the approval question from pass 3. Other pages are listed at the end, to read when their area is rebuilt.
+
+**How every page is protected:** each portal and work page has a "Page is loaded" guard. Signed-out visitors go to `index`, and the wrong role goes to `index` (or `portal_minor` for kids on adult pages). New adults and kids who haven't chosen a Ward are sent to `choose-ward` first. These are page-level redirects only. The real protection is the privacy rules and the checks inside backend workflows. **For the rebuild:** check the role on the server for every page and action, not just with a redirect.
+
+### Sign-in and onboarding
+
+- **`get-started`** (3 steps):
+  1. **Create your account:** pick an Account Type, then enter name, email and password, and sign up. The role is set from the account type: any type with `creates_household` → **Leader**; Staff → **Training** (not Staff); Sponsor, Partner and Referring agency go to their own portals.
+  2. **Set up your household:** a name and a plan create the Household.
+  3. **Add your family:** name and birthday, one at a time, through `vu_add_member`. Each person gets a member code shown on screen ("write it down"). Adults are sent to `portal_adult` when done.
+  - Account types: Adult homemaker, Minor homemaker admin, Staff, Sponsor, Partner, Referring agency. **Sponsor, Partner and Agency are self-chosen with no vetting.** Their store items still need approval, but decide on purpose whether these roles need a check.
+- **`member-login`:** a single "Member code" box (for example AB12CD34). It calls `vu_code_login`, logs in with the email and password that come back, then goes to `portal_minor` (kids) or `portal_adult`. See pass 3 for why this must change in the rebuild.
+- **`index`, `reset_pw`:** the public home and password reset (not read in detail).
+
+### Households
+
+- **`household-setup`** (adults only; kids are sent to portal_minor):
+  - Verification: submit a trusted adult's name and contact, or upload a verification document. **Staff** verify or send back on `portal_staff`.
+  - Connections: send a HouseholdIntro to another household, and approve or decline incoming intros (`vu_trust_sync` then links them).
+  - Members: add a member (`vu_add_member`), make a new member code (`vu_new_member_code`), copy it, and generate a minor join code (a Household Invite).
+- **`portal_adult`** (Parent and Leader): generate a minor join code, **approve or decline a minor's request to join community chat**, and links to chores, approvals and household-setup.
+- **`portal_minor`** (Kids): links to the wish list (wallet), chores, jobs and team chat, and an "ask to join community chat" button.
+
+### Chores and approvals
+
+- **`chores`:** a week calendar of chores.
+  - Parents add chores (a token minimum is enforced with an alert), build a **rotation** (`vu_rotation_day`), edit or delete one chore or a list, and **approve** (`vu_chore_approve`, then a "Token Burst" celebration popup).
+  - Kids mark chores done with proof and **request a transfer** (a ChoreTransferRequest with a token offer; the chore becomes Pending Transfer). The other kid accepts (`vu_transfer_accepted`, with an alert if the offerer can't pay) or declines.
+- **`approvals`:** approve or reject **Activities, Perks and Store Items**. Chore approval happens on the chores page, not here.
+- **`wallet`** and **`token_store`:** read in pass 3 (buying tokens, the wish list, parent credit, redeeming).
+- **`portal_inventory`** (Inventory and Owner): update reward stock, and mark redemptions delivered (stock goes down at delivery).
+
+### Chat (answers the pass 3 question)
+
+- **Kids can't let themselves into a chat.** When a Kid presses "Join" on `team-chat`, or "ask to join" on `portal_minor`, their ChatParticipant is created with **pending_approval = yes**. Adults joining a chat from a verified household (Community, or a Household chat from their own or a connected household) are approved straight away. When a job lead invites a kid to a team chat, the kid also starts pending.
+- Only **Parents and Leaders in the kid's household** approve or decline, on `portal_adult`. ChatParticipant has no auto-binding, so a kid can't flip pending from an input.
+- When an approval clears pending, `vu_chat_grant` adds the chat to the kid's approved_chats, and Message privacy follows from that.
+- **One rule of Bubble to remember:** privacy rules control what people can *see*. They don't stop a page workflow from *changing* something the user can see. Who can change what in Bubble is set by each page's workflow conditions. The rebuild must check every change on the server.
+
+### Pages not read in detail yet
+
+`index`, `profile`, `reset_pw`, `tasks`, `jobs`, `calendar`, `requests`, `passes`, `effort`, `make-it-right`, `my-keep`, `membership`, `choose-ward`, `my-ward`, `my-people`, `school`, `got-your-back`, `show-me`, `shopping`, `walkthrough`, `payback`, `portal_owner`, `portal_partner`, `portal_sponsor`, `portal_training`, `404`, `mock_2`, plus the 4 mobile views and the reusable header, sidebar, offline_banner and phone_bar. Read each one when its area is rebuilt.
+
+Also still open from pass 2: whether any page has inputs auto-saving into **Perk Redemption, Reward Streak or Outsource Request** money fields. Since Live has no users, turn their auto-binding off at the next Bubble session, the same way as Redemption, and let Bubble's issue check name anything that breaks.
+
 ## Next passes
 
 1. **Pass 2, data:** done.
 2. **Pass 3, logic:** done 2026-11-25 (see above). Non-money workflows were read at overview level only.
-3. **Pass 4, screens:** note what each page shows and does, so milestone 5 knows what to rebuild first.
+3. **Pass 4, screens:** first-slice pages done 2026-11-25 (see above). The other pages are read when their area is rebuilt.

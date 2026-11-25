@@ -98,7 +98,9 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - [x] **Pass 3, the rest:** money helpers, outside services, sign-in and roles, and scheduled work. The other non-money workflows were read at overview level only.
 - [x] **`vu_admin_set_role` Owner check:** added by Spark, on Live (checked 2026-11-25).
 - [ ] **Spark, in Bubble:** check the Stripe key is private and `sk_test_`; check Logs → Scheduler that `vu_month_cycle` is queued.
-- [ ] **Pass 4, screens:** what each page shows and does, and which pages have inputs linked to money fields.
+- [x] **Pass 4, screens (first slice):** sign-in, onboarding, households, chores, approvals, wallet, store, inventory and chat. Kids can't let themselves into a chat: they start pending until a Parent or Leader approves. The other pages are read when their area is rebuilt.
+- [ ] **Next Bubble session:** turn off auto-binding on Perk Redemption, Reward Streak and Outsource Request (then run the issue check).
+- [ ] **Decide:** should Sponsor, Partner and Referring agency be self-chosen at sign-up, or need a check first?
 - [ ] **Answer the open questions below.**
 - [ ] **Milestone 2 Progress Package:** this file plus the finished inventory.
 
@@ -107,7 +109,7 @@ Each step ends with a Progress Package: working code, notes and a list of what's
 - **Live users (2026-11-25): none.** Village UpKeep hasn't launched, so there's nobody to move and no real data to bring over.
 - **The switch (decided 2026-11-25, decision 5):** start fresh. Nothing runs side by side and no data moves. The only real data in Bubble is Spark's own, and Spark will re-enter it. Build the new app, test it, launch it, and retire the Bubble app.
 - **The phone app (decided 2026-11-25, decision 6):** launch as a phone-friendly website. A native app is a later milestone (see the [parking lot](parking-lot.md)).
-- **Stripe:** Village UpKeep is part of the Art Plus Spark organization. Bubble already connects to Stripe (the Stripe plugin, plus Stripe Checkout through the API Connector). Still to check: which Stripe account those keys belong to, and whether they're test-mode keys. The rebuild uses test-mode keys until launch, kept in `.env` and never committed.
+- **Stripe:** Village UpKeep is part of the Art Plus Spark organization. Bubble already connects to Stripe (the Stripe plugin, plus Stripe Checkout through the API Connector). Pass 3 found they're test mode (the saved session id is `cs_test_`). Still to check: which Stripe account they belong to. The rebuild uses test-mode keys until launch, kept in `.env` and never committed.
 
 ## Open questions for Spark
 
