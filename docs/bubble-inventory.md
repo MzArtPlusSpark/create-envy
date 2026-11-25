@@ -454,14 +454,59 @@ So the ledger plus the carry should always explain the balance. **Chore approval
 - **"Record partner payout on a new redemption"** (a database trigger): when a Redemption is created, it sets the supplier to the Store Item's creator, payout_owed to the item's `partner_payout_per_item`, and payout_paid = no. **Nothing here pays the partner.** Paying out is done by hand, outside the app.
 - **`vu_reward_unlock`** (wish list item): runs if the caller is the kid or a Parent, Leader or Owner in the kid's household, the item isn't already unlocked, **the kid's balance covers the price**, and parents have contributed at least the target credit. Then it unlocks the item, creates a Redemption and spends the tokens (carry, Transaction, reconcile).
 
-### Still to read in pass 3
+### The other money helpers
 
-- vu_task_incentive_settle, vu_job_team_share (amounts are known from vu_job_approve), vu_reward_delivered, vu_bundle_credit, vu_contribution_log, effort_from_payout, earn_task_verified
-- The API Connector calls themselves: which Stripe key they use (test or live), and whether the key is marked private
-- Every non-money workflow: effort, scoring, school, keep, Make It Right, chores reset and rotation, shopping receipt reading, earn lookup
+- **`vu_task_incentive_settle`** (incentive, earner): stops if the amount is 0 or less, or the contributor can't cover it. Otherwise it moves the amount from the contributor to the earner (carry, Transaction, reconcile on both sides).
+- **`vu_job_team_share`** (member, job, share): stops if the share is 0 or less, or the member has no kid. Otherwise it pays the share to that teammate. **The amount is passed in by the caller.** Only `vu_job_approve` calls it, but the rebuild should work the share out on the server, not accept it as input.
+- **`vu_reward_delivered`** (wish list item): only a Parent, Leader or Owner in the kid's household, for an unlocked item not yet delivered. It marks the item and its Redemption delivered. No tokens move.
+- **"Grant Parent Contribution Credit for a bundle"** (database trigger on a new BundlePurchase): adds `credit_granted` to the buyer's `parent_contribution_credit`.
+- **"Log Parent Contribution Credit on a wish list goal"** (database trigger): when a wish list item's parent_contributed_credit goes up, it writes a Transaction to log it. The contribution itself is made on the wallet page, which changes the item and the parent's credit straight from the page.
+- **`effort_from_payout`** (database trigger on a new Reward Payout Transaction): logs Effort Events for the kid, so earning feeds the effort score.
+- **`earn_task_verified`** (database trigger): when a Payback Task becomes Verified, it logs an Effort Event and updates its Formal Request.
+- **Chore transfers:** `vu_transfer_accepted` runs only if the caller is the request's `to_user` in the same household, the request is still Requested with from_agreed = yes, the chore is still assigned to the from_user and Pending Transfer, and **the from_user can cover the offered tokens**. Then it moves the chore and pays the offer from the from_user to the to_user. `vu_transfer_declined` gives the chore back.
+
+### Outside services (API Connector)
+
+| Call | Goes to | Key | Used by |
+|---|---|---|---|
+| Stripe Checkout: Create Checkout Session, Create Subscription Checkout Session, Retrieve Checkout Session | api.stripe.com | Set on the collection, so it can't be read here. **Test mode:** the saved example session id starts with `cs_test_`. | Wallet (tokens), membership page, the two fulfil workflows |
+| "Claude Coach" API Call | api.anthropic.com, model claude-sonnet-5-5 | `x-api-key` marked **private** | The coach chat, and `shop_read_receipt` (reading shopping receipts) |
+| "Product Page: Read page" | Any web address: `https://[page]` | None | `earn_lookup`, which reads a product page from a Formal Request's link to find a price |
+
+- **The coach is an AI** (Claude), with a written system prompt: plain and warm, no blame, no diagnosing, and a hand-off to a Lantern Steward if safety comes up. That answers part of open question 1 in project-zero.md. Kids' coach messages and receipt photos are sent to Anthropic, so the rebuild needs a privacy note that says so.
+- Spark should check in Bubble (Plugins → API Connector → Stripe Checkout) that the Stripe key is **marked private** and is a **test** key (`sk_test_…`). The tool can't see keys set on the collection.
+- "Read page" fetches any address a user types into a Formal Request link. It's low risk, but the rebuild should only allow `https` and block private network addresses.
+- The saved example values in these calls (an email address, version-test URLs, a Stripe price id) are only used to set the calls up. The workflows pass real values.
+
+### Sign-in, households and roles
+
+- **Code sign-in (`vu_code_login`):** given an 8-character code, it returns that member's **login email and actual password ("secret")** to the page, which then signs in with them. `vu_add_member` and `vu_new_member_code` create the account, set a temporary password, and save the code, email and password in a **Member Login** record. Member Login is private to everyone, and only workflows read it.
+  - ⚠️ So the password is stored as plain text, sent to the browser, and anyone who has a code has the full password. There's also no limit on how many codes someone can try.
+  - **For the rebuild:** treat the code as a password. Store only a hash, check it on the server, never send a password to the browser, and limit failed tries. Auth.js can do this with a custom "member code" sign-in.
+- **Joining a household (`vu_join_household`):** it needs an unused, unexpired invite code. It puts the user in that household **as a Kid** and marks the invite used.
+- **Roles:**
+  - `vu_set_user_role` changes a role only if the caller is an **Owner**.
+  - ⚠️ **`vu_admin_set_role` has no check at all.** It sets any user's role to whatever it's given. It isn't a public API, so it can only be started from the app's own pages, and those may check. But anyone who could start it could make themselves Owner. **Fix in Bubble:** add the condition "Current User's role is Owner" to its step (an editor-only change, since the tool can't write role checks).
+  - "Keep approval permission aligned with role" (`vu_role_sync`) updates `is_approver` whenever a role changes.
+- **Connected households (`vu_trust_sync`):** when a HouseholdIntro links two households, it updates both households' `connected_households`. This is what lets tasks with "Connected households" visibility be seen.
+- **Chat access (`vu_chat_grant`, `vu_chat_revoke`):** when a ChatParticipant is approved (not pending, not left), it adds the chat to the user's `approved_chats`. That list is what the Message privacy rule checks. Pass 4 should check that only an approver can set pending_approval to no.
+
+### Scheduled and repeating work
+
+- **Chore periods:** a new weekly or monthly chore sets its due date and starts a Bubble **recurring event**, "Start the next chore period". Each period it sets "Done this period" chores back to Active and moves the due date on.
+- **Chore rotation (`vu_rotation_day`):** creates one chore, then schedules itself again for the next one (i + 1 < total), spreading a rotation across members.
+- **Monthly scores (`vu_month_cycle`):** closes this month's scores, schedules `vu_month_finish` 10 minutes later, updates households, then **schedules itself for 5 minutes past the start of next month**. Something has to start it the first time. Check Bubble's Logs → Scheduler that it's queued on Live.
+- **Score triggers:** opening a household's score (score_open_household and score_open_member) creates Household and Member Scores. Every new Effort Event (`effort_score`) adds to the member's score. Closing a score (score_close_*, score_finish_household) totals it.
+- **Keep (`keep_due`, `keep_grace_end`):** on the due date, it closes this Keep Agreement period, creates the next one, schedules the next `keep_due`, and schedules `keep_grace_end` for when the grace hours run out.
+- **School (`school_week_close`):** closes this week's Grade Check, creates next week's, and schedules itself again.
+- The rebuild needs a scheduler for all of these, for example EventBridge Scheduler on AWS calling the app. Each job should be safe to run twice.
+
+### Not read in detail
+
+These were read at the name and trigger level only. They don't move tokens or money: the 10 effort_* workflows other than effort_score and effort_from_payout, mir_add_member, mir_owned, mir_check_done (Make It Right), school_notify_steward, school_plan_started, school_check_turned_in, school_work_turned_in, walk_add_finding, vu_ward_help, shop_price_line, earn_lookup_read, earn_lookup_fallback, earn_plan_start, earn_plan_line, vu_check_email, vu_check_invite. Read them in detail when their area is rebuilt.
 
 ## Next passes
 
 1. **Pass 2, data:** done.
-2. **Pass 3, logic:** money workflows read (above). Finish the list under "Still to read in pass 3".
+2. **Pass 3, logic:** done 2026-11-25 (see above). Non-money workflows were read at overview level only.
 3. **Pass 4, screens:** note what each page shows and does, so milestone 5 knows what to rebuild first.
